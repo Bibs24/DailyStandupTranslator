@@ -1,0 +1,2 @@
+# DailyStandupTranslator
+Humour &amp; Code

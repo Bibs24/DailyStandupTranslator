@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Standup Translator</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0f172a 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #e2e8f0;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Premium background layers */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(ellipse at 20% 50%, rgba(96, 165, 250, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(167, 139, 250, 0.06) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(96, 165, 250, 0.03) 0%, transparent 70%);
+            pointer-events: none;
+            animation: floatBg 20s ease-in-out infinite;
+            z-index: 0;
+            transform: translate(-50%, -50%);
+        }
+
+        @keyframes floatBg {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-45%, -45%) scale(1.05); }
+        }
+
+        .container {
+            width: 100%;
+            max-width: 680px;
+            position: relative;
+            z-index: 1;
+            animation: slideInDown 0.8s ease-out;
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(20, 30, 50, 0.85) 100%);
+            border: 1px solid rgba(148, 163, 184, 0.15);
+            border-radius: 24px;
+            padding: 56px 48px;
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.5),
+                0 0 60px rgba(96, 165, 250, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Premium card shine effect */
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            opacity: 0.5;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 48px;
+            animation: fadeInUp 0.8s ease-out 0.1s backwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .title {
+            font-size: 42px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 25%, #a78bfa 75%, #d946ef 100%);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+            animation: gradientShift 8s ease infinite;
+            text-shadow: 0 0 30px rgba(96, 165, 250, 0.1);
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .subtitle {
+            font-size: 17px;
+            color: #cbd5e1;
+            font-weight: 400;
+            letter-spacing: -0.2px;
+            line-height: 1.6;
+        }
+
+        .input-section {
+            margin-bottom: 28px;
+            animation: fadeInUp 0.8s ease-out 0.2s backwards;
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 18px 20px;
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.4) 0%, rgba(30, 41, 59, 0.6) 100%);
+            border: 1.5px solid rgba(148, 163, 184, 0.15);
+            border-radius: 14px;
+            color: #e2e8f0;
+            font-size: 15px;
+            font-family: 'Inter', inherit;
+            font-weight: 500;
+            resize: vertical;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            line-height: 1.6;
+            letter-spacing: -0.2px;
+        }
+
+        textarea::placeholder {
+            color: #64748b;
+            font-weight: 400;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: rgba(96, 165, 250, 0.5);
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(30, 41, 59, 0.8) 100%);
+            box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.08), inset 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .button-section {
+            margin-bottom: 36px;
+            animation: fadeInUp 0.8s ease-out 0.3s backwards;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px 28px;
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 
+                0 12px 24px rgba(96, 165, 250, 0.3),
+                0 0 20px rgba(96, 165, 250, 0.15),
+                0 0 1px rgba(255, 255, 255, 0.2) inset;
+            letter-spacing: -0.3px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .btn:hover:not(:disabled)::before {
+            left: 100%;
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 
+                0 18px 36px rgba(96, 165, 250, 0.4),
+                0 0 30px rgba(96, 165, 250, 0.25),
+                0 0 1px rgba(255, 255, 255, 0.3) inset;
+        }
+
+        .btn:active:not(:disabled) {
+            transform: translateY(-1px) scale(0.98);
+            box-shadow: 
+                0 8px 16px rgba(96, 165, 250, 0.25),
+                0 0 15px rgba(96, 165, 250, 0.1),
+                0 0 1px rgba(255, 255, 255, 0.15) inset;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .result-section {
+            display: none;
+            animation: fadeIn 0.7s ease 0.2s;
+        }
+
+        .result-section.show {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-box {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.5) 0%, rgba(30, 41, 59, 0.3) 100%);
+            border: 1.5px solid rgba(96, 165, 250, 0.25);
+            border-radius: 14px;
+            padding: 24px;
+            margin-bottom: 20px;
+            border-left: 4px solid #60a5fa;
+            box-shadow: 
+                0 8px 16px rgba(96, 165, 250, 0.08),
+                inset 0 1px 2px rgba(255, 255, 255, 0.05);
+            transition: all 0.4s ease;
+            animation: slideInLeft 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .result-box:hover {
+            border-color: rgba(96, 165, 250, 0.4);
+            box-shadow: 
+                0 12px 24px rgba(96, 165, 250, 0.15),
+                inset 0 1px 2px rgba(255, 255, 255, 0.05);
+            transform: translateX(4px);
+        }
+
+        .result-label {
+            font-size: 12px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .result-text {
+            font-size: 19px;
+            color: #e2e8f0;
+            font-weight: 600;
+            line-height: 1.7;
+            letter-spacing: -0.3px;
+        }
+
+        .confidence-section {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.3) 0%, rgba(30, 41, 59, 0.15) 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.03);
+        }
+
+        .confidence-label {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-bottom: 12px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        .confidence-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(148, 163, 184, 0.15);
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        .confidence-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            opacity: 0;
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { opacity: 0; left: -100%; }
+            50% { opacity: 1; }
+            100% { opacity: 0; left: 100%; }
+        }
+
+        /* Loader Animation */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .loader {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(96, 165, 250, 0.3);
+            border-top: 3px solid #60a5fa;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #60a5fa 0%, #a78bfa 100%);
+            border-radius: 4px;
+            transition: width 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 0 15px rgba(96, 165, 250, 0.4);
+            position: relative;
+        }
+
+        .confidence-percent {
+            font-size: 13px;
+            color: #cbd5e1;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: 600;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 48px;
+            font-size: 13px;
+            color: #64748b;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            animation: fadeInUp 0.8s ease-out 0.4s backwards;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(20, 30, 50, 0.95) 100%);
+            border: 1.5px solid rgba(148, 163, 184, 0.2);
+            border-radius: 20px;
+            padding: 48px 40px;
+            text-align: center;
+            max-width: 420px;
+            box-shadow: 
+                0 30px 60px rgba(0, 0, 0, 0.6),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            animation: scaleIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .modal-emoji {
+            font-size: 72px;
+            margin-bottom: 20px;
+            display: inline-block;
+            animation: bounce 0.8s ease-in-out;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        .modal-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+        }
+
+        .modal-text {
+            font-size: 16px;
+            color: #cbd5e1;
+            margin-bottom: 28px;
+            line-height: 1.7;
+            font-weight: 500;
+        }
+
+        .modal-button {
+            padding: 14px 36px;
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 
+                0 12px 24px rgba(96, 165, 250, 0.3),
+                0 0 20px rgba(96, 165, 250, 0.15);
+            letter-spacing: -0.2px;
+        }
+
+        .modal-button:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 
+                0 16px 32px rgba(96, 165, 250, 0.4),
+                0 0 30px rgba(96, 165, 250, 0.25);
+        }
+
+        .modal-button:active {
+            transform: translateY(0) scale(1);
+        }
+
+        /* Meme Section */
+        .meme-section {
+            display: none;
+            animation: fadeIn 0.7s ease 0.3s;
+            margin-top: 24px;
+        }
+
+        .meme-section.show {
+            display: block;
+        }
+        .meme-container {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.4) 0%, rgba(30, 41, 59, 0.2) 100%);
+            border: 1.5px solid rgba(167, 139, 250, 0.3);
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 
+                0 8px 16px rgba(167, 139, 250, 0.08),
+                inset 0 1px 2px rgba(255, 255, 255, 0.05);
+            transition: all 0.4s ease;
+            overflow: hidden;
+        }
+
+        .meme-container:hover {
+            border-color: rgba(96, 165, 250, 0.4);
+            box-shadow: 
+                0 12px 24px rgba(167, 139, 250, 0.15),
+                inset 0 1px 2px rgba(255, 255, 255, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .meme-image {
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            display: block;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+            object-fit: contain;
+            background: rgba(30, 41, 59, 0.6);
+        }
+
+        .meme-image:hover {
+            transform: scale(1.02);
+        }
+
+        .meme-display-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 220px;
+            background: rgba(15, 23, 42, 0.3);
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .meme-content {
+            text-align: center;
+            animation: slideUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .meme-emoji {
+            font-size: 72px;
+            margin-bottom: 16px;
+            display: block;
+            animation: bounce 0.8s ease-in-out;
+        }
+
+        .meme-image {
+            width: 280px;
+            height: 200px;
+            margin-bottom: 16px;
+            display: block;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(96, 165, 250, 0.2);
+            animation: slideUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1) translateY(0); }
+            50% { transform: scale(1.1) translateY(-10px); }
+        }
+
+        .meme-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #60a5fa;
+            margin-bottom: 12px;
+            letter-spacing: -0.3px;
+        }
+
+        .meme-text {
+            font-size: 16px;
+            color: #cbd5e1;
+            font-weight: 500;
+            line-height: 1.8;
+            white-space: pre-line;
+            font-family: 'Inter', monospace;
+        }
+
+        .meme-fallback {
+            text-align: center;
+            color: #cbd5e1;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .meme-fallback-emoji {
+            font-size: 64px;
+            display: block;
+            margin-bottom: 12px;
+        }
+
+        .meme-caption {
+            font-size: 15px;
+            color: #cbd5e1;
+            text-align: center;
+            margin-bottom: 12px;
+            font-weight: 500;
+            line-height: 1.6;
+            letter-spacing: -0.2px;
+        }
+
+        .meme-footer {
+            text-align: center;
+            font-size: 13px;
+            color: #64748b;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .btn-secondary {
+            flex: 1;
+            padding: 14px 20px;
+            background: rgba(148, 163, 184, 0.1);
+            border: 1.5px solid rgba(148, 163, 184, 0.2);
+            border-radius: 10px;
+            color: #cbd5e1;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            letter-spacing: -0.2px;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(148, 163, 184, 0.15);
+            border-color: rgba(96, 165, 250, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(96, 165, 250, 0.1);
+        }
+
+        .btn-secondary:active {
+            transform: translateY(0);
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .card {
+                padding: 32px 24px;
+                border-radius: 20px;
+            }
+
+            .title {
+                font-size: 32px;
+            }
+
+            .subtitle {
+                font-size: 15px;
+            }
+
+            textarea {
+                height: 130px;
+                font-size: 16px;
+                padding: 16px 18px;
+            }
+
+            .result-text {
+                font-size: 17px;
+            }
+
+            .modal-content {
+                padding: 36px 24px;
+                margin: 20px;
+                border-radius: 16px;
+            }
+
+            .modal-emoji {
+                font-size: 56px;
+            }
+
+            .modal-title {
+                font-size: 26px;
+            }
+
+            .header {
+                margin-bottom: 36px;
+            }
+
+            .button-section {
+                margin-bottom: 28px;
+            }
+
+            .footer {
+                margin-top: 36px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <h1 class="title">Daily Standup Translator</h1>
+                <p class="subtitle">Convert your standup update into what actually happened</p>
+            </div>
+
+            <div class="input-section">
+                <textarea id="standupInput" placeholder="Type your standup update..."></textarea>
+            </div>
+
+            <div class="button-section">
+                <button class="btn" id="translateBtn"><span id="btnContent">Translate</span></button>
+            </div>
+
+            <div class="result-section" id="resultSection">
+                <div class="result-box">
+                    <div class="result-label">🔮 What Actually Happened</div>
+                    <div class="result-text" id="resultText"></div>
+                </div>
+
+                <div class="confidence-section">
+                    <div class="confidence-label">AI Confidence Score</div>
+                    <div class="confidence-bar">
+                        <div class="confidence-fill" id="confidenceFill"></div>
+                    </div>
+                    <div class="confidence-percent">
+                        <span>Accuracy Level</span>
+                        <span id="confidencePercent">0</span>%
+                    </div>
+                </div>
+
+                <div class="meme-section" id="memeSection">
+                    <div class="meme-container">
+                        <div class="meme-display-wrapper" id="memeDisplayWrapper">
+                            <div class="meme-content">
+                                <img class="meme-image" id="memeImage" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect fill='%2360a5fa' width='400' height='300'/%3E%3Ctext x='50%25' y='50%25' font-size='48' fill='white' text-anchor='middle' dominant-baseline='middle' font-weight='bold'%3EYou Got%3C/text%3E%3Ctext x='50%25' y='60%25' font-size='48' fill='%23fbbf24' text-anchor='middle' dominant-baseline='middle' font-weight='bold'%3EApril Fooled!%3C/text%3E%3Ctext x='50%25' y='80%25' font-size='64' text-anchor='middle' dominant-baseline='middle'%3E🤣%3C/text%3E%3C/svg%3E" alt="April Fools Meme"/>
+                                <div class="meme-title" id="memeTitle">Meme</div>
+                                <div class="meme-text" id="memeText">Loading...</div>
+                            </div>
+                        </div>
+                        <div class="meme-footer">Reality Check 😎</div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn-secondary" id="revealSecretBtn" style="display: none; margin-top: 10px;">🤫 Reveal Secret</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer">
+                Reality Check Translator
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="aprilFoolsModal">
+        <div class="modal-content">
+            <div class="modal-emoji">�</div>
+            <div class="modal-title">You've Been April Fooled! �</div>
+            <div class="modal-text">Surprise! 😂 This translator isn't actually translating anything. It's a fun reality check tool that turns boring standup updates into hilarious, brutally honest takes. That impressive confidence score? Pure fiction! We're just having fun with your daily updates. No AI, no magic—just good laughs. Thanks for being a good sport! 🎉</div>
+            <button class="modal-button" id="closeModalBtn">Good one! 😄 �</button>
+        </div>
+    </div>
+
+    <script>
+        // ===== Static Contextual Response System =====
+        // Pure local responses - no API calls needed!
+
+        // Get contextual response based on detected category
+        function getContextualResponse(userInput) {
+            const category = detectCategory(userInput);
+            const responses = responseTemplates[category];
+            const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+            return "Reality Check: " + randomResponse;
+        }
+
+        // ===== Existing code continues below =====
+        // Funny translations database
+        const translations = [
+            "I debugged for 5 hours and fixed a typo.",
+            "I attended meetings and did nothing.",
+            "I renamed a variable and called it progress.",
+            "I Googled the solution and hoped no one notices.",
+            "I am still figuring out what the bug is.",
+            "I copy-pasted Stack Overflow code without reading it.",
+            "I pretended to work while actually scrolling Twitter.",
+            "I fixed a bug by turning it off and on again.",
+            "I wrote the same code three different ways to confuse my reviewers.",
+            "I called a function 'temporary' and shipped it to production.",
+            "I asked for help, then immediately solved it myself.",
+            "I spent 3 hours looking for a semicolon.",
+            "I merged a PR that broke everything.",
+            "I claimed it was a 'cache issue' to avoid investigating.",
+            "I renamed the function to make it look like I did something."
+        ];
+
+        // Meme data aligned with categories (self-contained, no URLs)
+        const memeMap = {
+            backend: [
+                {
+                    emoji: '🔌',
+                    title: 'API Status',
+                    text: '200 OK\n✓ Success'
+                },
+                {
+                    emoji: '🗄️',
+                    title: 'Database',
+                    text: 'SELECT * FROM excuses\nROWS: ∞'
+                }
+            ],
+            frontend: [
+                {
+                    emoji: '🎨',
+                    title: 'CSS Alignment',
+                    text: 'Why won\'t it center?\nflex: center;\nflex: center;\nflex: center;'
+                },
+                {
+                    emoji: '📱',
+                    title: 'Responsive Design',
+                    text: 'Looks good on my screen\n(opens on phone)\n💀'
+                }
+            ],
+            debugging: [
+                {
+                    emoji: '🐛',
+                    title: 'Bug Report',
+                    text: 'Error: TypeError\nCause: Everything\nSolution: console.log()'
+                },
+                {
+                    emoji: '🔍',
+                    title: 'Debugging Session',
+                    text: '4 hours later...\nFound: missing semicolon'
+                }
+            ],
+            meetings: [
+                {
+                    emoji: '📞',
+                    title: 'Team Standup',
+                    text: 'Me:\nYesterday: "Worked"\nToday: "Will work"\nReason: "Meetings"'
+                },
+                {
+                    emoji: '⏰',
+                    title: 'Back-to-Back Calls',
+                    text: '9am: Standup\n10am: Planning\n11am: Retro\n12pm: Crying'
+                }
+            ],
+            deployment: [
+                {
+                    emoji: '🚀',
+                    title: 'Production Deploy',
+                    text: 'git push\n...\n🔥 EVERYTHING IS ON FIRE'
+                },
+                {
+                    emoji: '⚠️',
+                    title: 'Hotfix',
+                    text: 'Deploy time: 5 min\nRollback time: 2 min\nRegret time: ∞'
+                }
+            ],
+            learning: [
+                {
+                    emoji: '📚',
+                    title: 'Documentation',
+                    text: 'Opened: 47 tabs\nRead: 0 tabs\nUnderstood: -5 tabs'
+                },
+                {
+                    emoji: '🧠',
+                    title: 'Learning Curve',
+                    text: 'Day 1: "I got this!"\nDay 2: "Hm..."\nDay 3: "What?"'
+                }
+            ],
+            performance: [
+                {
+                    emoji: '⚡',
+                    title: 'Optimization',
+                    text: 'Before: 500ms\nAfter: 499ms\nCelebration: 1 week'
+                },
+                {
+                    emoji: '📊',
+                    title: 'Speed Test',
+                    text: 'Improved by: 2%\nTime spent: 6 hours\nWorth it: ????'
+                }
+            ],
+            default: [
+                {
+                    emoji: '�',
+                    title: 'Developer Life',
+                    text: 'It works\nI don\'t know why\nBut it works'
+                },
+                {
+                    emoji: '🤷',
+                    title: 'Probably Fine',
+                    text: 'Did I test it?\nDid I deploy it?\nWill it break?\nYes.'
+                }
+            ]
+        };
+
+        // Keyword-to-category mapping
+        const keywordMap = {
+            backend: ["api", "backend", "server", "endpoint", "database", "db", "server", "rest"],
+            frontend: ["ui", "frontend", "css", "button", "design", "component", "react", "html", "page"],
+            debugging: ["bug", "fix", "issue", "error", "debug", "crash", "broken", "fixed"],
+            meetings: ["meeting", "sync", "discussion", "call", "standup", "team", "sync"],
+            deployment: ["deploy", "release", "prod", "production", "build", "shipped", "launch"],
+            learning: ["learn", "research", "explore", "read", "study", "investigated"],
+            performance: ["optimize", "performance", "speed", "latency", "slow", "fast"]
+        };
+
+        // Context-aware responses
+        const responseTemplates = {
+            backend: [
+                "I kept hitting the API until it finally responded correctly.",
+                "I debugged backend issues that magically fixed themselves.",
+                "I spent hours figuring out why the API wasn't working.",
+                "I changed something in the backend and hoped for the best.",
+                "I blamed the database until it actually was the database."
+            ],
+            frontend: [
+                "I adjusted UI for hours and it still looks the same.",
+                "I fixed CSS issues that only I could notice.",
+                "I moved things by 2px and called it progress.",
+                "I made it look right on my screen at least.",
+                "I fought with styling and lost multiple times."
+            ],
+            debugging: [
+                "I debugged for hours and fixed a typo.",
+                "I added console logs until something worked.",
+                "I solved one bug and created two more.",
+                "I was guessing most of the time.",
+                "I fixed it without understanding why it broke."
+            ],
+            meetings: [
+                "I attended meetings and contributed absolutely nothing.",
+                "I nodded in meetings pretending to understand.",
+                "I waited for the meeting to end.",
+                "I said 'makes sense' multiple times.",
+                "I survived back-to-back meetings."
+            ],
+            deployment: [
+                "I deployed and immediately found issues.",
+                "I pushed to production and hoped nothing breaks.",
+                "I fixed deployment issues under pressure.",
+                "I watched logs nervously after release.",
+                "I rolled back and pretended it never happened."
+            ],
+            learning: [
+                "I watched tutorials and felt productive.",
+                "I read documentation and got more confused.",
+                "I explored things without finishing anything.",
+                "I learned something I might forget tomorrow.",
+                "I went down a rabbit hole of docs."
+            ],
+            performance: [
+                "I tried optimizing but made it slightly worse.",
+                "I improved performance by 2% and celebrated.",
+                "I spent hours measuring tiny improvements.",
+                "I optimized things that didn't need optimizing.",
+                "I blamed performance on everything else."
+            ],
+            default: [
+                "I tried to understand what I was doing.",
+                "I made something work somehow.",
+                "I was busy looking busy.",
+                "I delayed the hard part for later.",
+                "I made progress… technically."
+            ]
+        };
+
+        // Detect category from user input
+        function detectCategory(input) {
+            const lowerInput = input.toLowerCase();
+            for (const [category, keywords] of Object.entries(keywordMap)) {
+                if (keywords.some(keyword => lowerInput.includes(keyword))) {
+                    return category;
+                }
+            }
+            return 'default';
+        }
+
+        // Extract main keyword from input for personalization
+        function extractKeyword(input) {
+            const lowerInput = input.toLowerCase();
+            for (const keywords of Object.values(keywordMap)) {
+                for (const keyword of keywords) {
+                    if (lowerInput.includes(keyword)) {
+                        return keyword;
+                    }
+                }
+            }
+            return null;
+        }
+
+        // Get context-aware translation
+        function getContextAwareTranslation(userInput) {
+            const category = detectCategory(userInput);
+            const responses = responseTemplates[category];
+            const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+            return "Reality Check: " + randomResponse;
+        }
+
+        // DOM element references
+        const translateBtn = document.getElementById('translateBtn');
+        const btnContent = document.getElementById('btnContent');
+        const standupInput = document.getElementById('standupInput');
+        const resultSection = document.getElementById('resultSection');
+        const resultText = document.getElementById('resultText');
+        const confidenceFill = document.getElementById('confidenceFill');
+        const confidencePercent = document.getElementById('confidencePercent');
+        const memeSection = document.getElementById('memeSection');
+        const revealSecretBtn = document.getElementById('revealSecretBtn');
+        const aprilFoolsModal = document.getElementById('aprilFoolsModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+
+        // Get random confidence score
+        function getRandomConfidence() {
+            return Math.floor(Math.random() * 40) + 60; // 60-99%
+        }
+
+        // Get random meme based on category
+        function getMemeForCategory(category) {
+            const memeList = memeMap[category] || memeMap.default;
+            return memeList[Math.floor(Math.random() * memeList.length)];
+        }
+
+        // Show meme section
+        function showMeme(category) {
+            const meme = getMemeForCategory(category);
+            const memeImage = document.getElementById('memeImage');
+            const memeTitle = document.getElementById('memeTitle');
+            const memeText = document.getElementById('memeText');
+            
+            // Update meme content
+            memeImage.src = meme.image || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect fill='%2360a5fa' width='400' height='300'/%3E%3Ctext x='50%25' y='50%25' font-size='48' fill='white' text-anchor='middle' dominant-baseline='middle' font-weight='bold'%3EYou Got%3C/text%3E%3Ctext x='50%25' y='60%25' font-size='48' fill='%23fbbf24' text-anchor='middle' dominant-baseline='middle' font-weight='bold'%3EApril Fooled!%3C/text%3E%3Ctext x='50%25' y='80%25' font-size='64' text-anchor='middle' dominant-baseline='middle'%3E🤣%3C/text%3E%3C/svg%3E";
+            memeTitle.textContent = meme.title;
+            memeText.textContent = meme.text;
+            
+            // Show the meme section with animation
+            memeSection.classList.add('show');
+        }
+
+        // Reset form and results
+        function resetForm() {
+            standupInput.value = '';
+            resultSection.classList.remove('show');
+            memeSection.classList.remove('show');
+            revealSecretBtn.style.display = 'none';
+            translateBtn.disabled = false;
+            translateBtn.textContent = 'Translate';
+        }
+
+        // Simulate typing effect
+        async function typeEffect(element, text, speed = 30) {
+            element.textContent = '';
+            for (let char of text) {
+                element.textContent += char;
+                await new Promise(resolve => setTimeout(resolve, speed));
+            }
+        }
+
+        // Translate standup
+        async function translate() {
+            const input = standupInput.value.trim();
+
+            if (!input) {
+                alert('Please enter your standup update first!');
+                return;
+            }
+
+            // Disable button and show loading state
+            translateBtn.disabled = true;
+            btnContent.innerHTML = '<div class="loader"></div>Translating...';
+
+            // Detect category first (for meme selection)
+            const category = detectCategory(input);
+
+            // Get contextual response (instant, no API calls)
+            const translation = getContextualResponse(input);
+            const confidence = getRandomConfidence();
+
+            // Simulate processing delay for better UX (1.5-2 seconds)
+            await new Promise(resolve => setTimeout(resolve, Math.random() * 500 + 1500));
+
+            // Show result with fade-in
+            resultSection.classList.add('show');
+
+            // Typing effect for result
+            await typeEffect(resultText, translation, 20);
+
+            // Animate confidence bar
+            confidenceFill.style.width = '0%';
+            await new Promise(resolve => setTimeout(resolve, 100));
+            confidenceFill.style.width = confidence + '%';
+            confidencePercent.textContent = confidence;
+
+            // Reset button
+            translateBtn.disabled = false;
+            btnContent.textContent = 'Translate';
+
+            // Show meme after 1.5 seconds (with matching category)
+            setTimeout(() => {
+                showMeme(category);
+                // Show reveal secret button after meme appears
+                revealSecretBtn.style.display = 'inline-block';
+            }, 1500);
+        }
+
+        // Close modal
+        function closeModal() {
+            aprilFoolsModal.classList.remove('show');
+        }
+
+        // Event listeners
+        translateBtn.addEventListener('click', translate);
+        revealSecretBtn.addEventListener('click', () => {
+            aprilFoolsModal.classList.add('show');
+        });
+        closeModalBtn.addEventListener('click', closeModal);
+        aprilFoolsModal.addEventListener('click', (e) => {
+            if (e.target === aprilFoolsModal) {
+                closeModal();
+            }
+        });
+
+        // Allow Enter to translate (Cmd+Enter on Mac)
+        standupInput.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                translate();
+            }
+        });
+    </script>
+</body>
+</html>
